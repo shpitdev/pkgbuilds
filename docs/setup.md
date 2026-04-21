@@ -81,6 +81,14 @@ If you are logged into GitHub locally with `gh auth login`, you can run:
 
 That uses your local GitHub CLI session for private release access.
 
+For `tabex-bin`, the package install hook now points users at:
+
+```bash
+tabex setup
+```
+
+That is safe because `v0.0.4` is the first stable release that ships the source-repo-side setup flow.
+
 ## Full Publish Setup
 
 When you are ready to publish to AUR:

@@ -38,6 +38,14 @@ makepkg -si
 
 `gh auth login` must be configured with access to the `shpitdev` org before `makepkg` can download the private release assets.
 
+After installing `tabex-bin`, start with:
+
+```bash
+tabex setup
+```
+
+The package includes an install hook that prints the same guidance after install or upgrade.
+
 ## Temporary Mode
 
 - You can use this repo immediately without creating the AUR repositories or AUR secrets.
