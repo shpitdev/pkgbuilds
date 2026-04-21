@@ -3,6 +3,7 @@ pkgbase = tabex-bin
 	pkgver = 0.0.4
 	pkgrel = 1
 	url = https://github.com/shpitdev/tabex
+	install = tabex-bin.install
 	arch = x86_64
 	license = LicenseRef-proprietary
 	makedepends = github-cli

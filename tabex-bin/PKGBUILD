@@ -7,6 +7,7 @@ pkgdesc="Tabex CLI for browser session, capture, and page inspection"
 arch=('x86_64')
 url="https://github.com/shpitdev/tabex"
 license=('LicenseRef-proprietary')
+install="${pkgname}.install"
 makedepends=('github-cli')
 provides=('tabex')
 conflicts=('tabex')
