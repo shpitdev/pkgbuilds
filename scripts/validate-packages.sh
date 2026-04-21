@@ -9,6 +9,13 @@ for package_dir in "${repo_root}"/*; do
   "${repo_root}/scripts/validate-package.sh" "${package_dir}"
 done
 
+meshix_pkg="${repo_root}/meshix-cli-bin"
+if [[ -f "${meshix_pkg}/PKGBUILD" ]]; then
+  grep -q 'gh release download "v${pkgver}"' "${meshix_pkg}/PKGBUILD"
+  grep -q 'install="${pkgname}\.install"' "${meshix_pkg}/PKGBUILD"
+  grep -q 'meshix-cli-dev' "${meshix_pkg}/meshix-cli-bin.install"
+fi
+
 tabex_pkg="${repo_root}/tabex-bin"
 if [[ -f "${tabex_pkg}/PKGBUILD" ]]; then
   grep -q 'install="${pkgname}\.install"' "${tabex_pkg}/PKGBUILD"
