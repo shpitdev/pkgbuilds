@@ -1,0 +1,12 @@
+pkgbase = osyrra-bin
+	pkgdesc = Osyrra silent email worker and operator TUI
+	pkgver = 0.0.2
+	pkgrel = 1
+	url = https://github.com/shpitdev/osyrra
+	arch = x86_64
+	license = LicenseRef-proprietary
+	makedepends = github-cli
+	provides = osyrra
+	conflicts = osyrra
+
+pkgname = osyrra-bin

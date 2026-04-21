@@ -1,0 +1,103 @@
+name: publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '*/PKGBUILD'
+      - '*/.SRCINFO'
+      - '*/*.install'
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.collect.outputs.packages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Find updated packages
+        id: collect
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          before="${{ github.event.before }}"
+          if [[ -z "${before}" || "${before}" =~ ^0+$ ]]; then
+            before="$(git rev-list --max-parents=0 HEAD)"
+          fi
+
+          mapfile -t packages < <(
+            git diff --name-only "${before}" "${GITHUB_SHA}" -- '*/PKGBUILD' '*/.SRCINFO' '*/*.install' \
+              | xargs -r -n1 dirname \
+              | sort -u
+          )
+
+          if ((${#packages[@]} == 0)); then
+            echo 'packages=[]' >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          json="$(printf '%s\n' "${packages[@]}" | jq -R . | jq -s -c .)"
+          echo "packages=${json}" >> "${GITHUB_OUTPUT}"
+
+  publish:
+    needs: detect
+    if: ${{ needs.detect.outputs.packages != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
+    permissions:
+      contents: read
+    env:
+      AUR_USERNAME: ${{ secrets.AUR_USERNAME }}
+      AUR_EMAIL: ${{ secrets.AUR_EMAIL }}
+      AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check publishing configuration
+        id: config
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [[ -n "${AUR_USERNAME}" && -n "${AUR_EMAIL}" && -n "${AUR_SSH_PRIVATE_KEY}" ]]; then
+            echo 'enabled=true' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'enabled=false' >> "${GITHUB_OUTPUT}"
+            echo "AUR publish skipped: AUR secrets are not configured."
+          fi
+
+      - name: Install publish dependencies
+        if: ${{ steps.config.outputs.enabled == 'true' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes openssh-client rsync
+
+      - name: Start ssh-agent
+        if: ${{ steps.config.outputs.enabled == 'true' }}
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${AUR_SSH_PRIVATE_KEY}"
+          {
+            echo "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}"
+            echo "SSH_AGENT_PID=${SSH_AGENT_PID}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Publish package
+        if: ${{ steps.config.outputs.enabled == 'true' }}
+        run: ./scripts/publish-package.sh "${{ matrix.package }}"

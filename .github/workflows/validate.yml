@@ -1,0 +1,32 @@
+name: validate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '*/PKGBUILD'
+      - '*/.SRCINFO'
+      - '*/*.install'
+      - '.github/workflows/**'
+      - 'scripts/**'
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Install validation dependencies
+        run: pacman -Syu --noconfirm git github-cli jq unzip
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Mark workspace as safe
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
+      - name: Validate packages
+        run: ./scripts/validate-packages.sh
