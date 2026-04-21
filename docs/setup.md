@@ -16,8 +16,7 @@ Use this first.
 Result:
 
 - branch and PR creation use the repo `GITHUB_TOKEN`
-- `meshix-cli-bin` updates from the public upstream release without any extra secret
-- `tabex-bin` and `osyrra-bin` update only if the repo has access to `SHPIT_GH_TOKEN`
+- `meshix-cli-bin`, `tabex-bin`, and `osyrra-bin` update only if the repo has access to `SHPIT_GH_TOKEN`
 - AUR publishing is skipped without failing
 - upstream `meshix-observability`, `tabex`, and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`, but that depends on `SHPIT_WORKFLOW_DISPATCH_TOKEN` being available in their producer-repo Depot CI secrets
 
@@ -29,7 +28,7 @@ Result:
 
 ## SHPIT_GH_TOKEN
 
-Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/tabex` and `shpitdev/osyrra`. An org-level secret with `selected` visibility is the cleanest option if you have multiple consuming repos. `meshix-cli-bin` does not need this secret because `shpitdev/meshix-observability` publishes public releases.
+Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. An org-level secret with `selected` visibility is the cleanest option if you have multiple consuming repos.
 
 Attach it to this repo with:
 
@@ -85,7 +84,7 @@ If you are logged into GitHub locally with `gh auth login`, you can run:
 ./scripts/validate-packages.sh
 ```
 
-That uses your local GitHub CLI session for private release access when a package needs it. `meshix-cli-bin` installs from the public GitHub release asset and does not need any extra GitHub auth.
+That uses your local GitHub CLI session for private release access.
 
 For `tabex-bin`, the package install hook now points users at:
 
@@ -111,8 +110,7 @@ When you are ready to publish to AUR:
 ## Token Model
 
 - Same-repo automation uses the built-in `GITHUB_TOKEN`.
-- `meshix-cli-bin` uses the public upstream release, so it does not need any extra release-read credential in Actions.
-- Cross-repo private release access for `tabex-bin` and `osyrra-bin` still needs a separate credential in Actions, because the workflow token is scoped to the repository that contains the workflow.
+- Cross-repo private release access for `meshix-cli-bin`, `tabex-bin`, and `osyrra-bin` needs a separate credential in Actions, because the workflow token is scoped to the repository that contains the workflow.
 - Local runs can use your normal `gh auth login` session instead of any exported token.
 
 ## Recommended Follow-Up

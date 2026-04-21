@@ -11,7 +11,8 @@ done
 
 meshix_pkg="${repo_root}/meshix-cli-bin"
 if [[ -f "${meshix_pkg}/PKGBUILD" ]]; then
-  grep -q 'source=("${url}/releases/download/v${pkgver}/${_asset}")' "${meshix_pkg}/PKGBUILD"
+  grep -q 'gh release download "v${pkgver}"' "${meshix_pkg}/PKGBUILD"
+  grep -q 'install="${pkgname}\.install"' "${meshix_pkg}/PKGBUILD"
   grep -q 'meshix-cli-dev' "${meshix_pkg}/meshix-cli-bin.install"
 fi
 

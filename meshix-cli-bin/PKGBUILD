@@ -8,13 +8,23 @@ arch=('x86_64')
 url="https://github.com/shpitdev/meshix-observability"
 license=('LicenseRef-proprietary')
 install="${pkgname}.install"
+makedepends=('github-cli')
 provides=('meshix-cli')
 conflicts=('meshix-cli')
 
+# Public PKGBUILD, private release asset. Users need GitHub access to the shpitdev org.
 _asset="meshix-cli_v${pkgver}_linux_amd64.tar.gz"
 _sha256='a6f8fa1b8c12fa8705bc508efe13b8f462c375016edee0683ceb577370ac1911'
-source=("${url}/releases/download/v${pkgver}/${_asset}")
-sha256sums=("${_sha256}")
+
+prepare() {
+  gh release download "v${pkgver}" \
+    --repo shpitdev/meshix-observability \
+    --pattern "${_asset}" \
+    --dir . --clobber
+
+  echo "${_sha256}  ${_asset}" | sha256sum -c
+  tar xzf "${_asset}"
+}
 
 package() {
   install -Dm755 "meshix-cli_v${pkgver}_linux_amd64/meshix-cli" \

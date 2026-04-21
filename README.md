@@ -6,7 +6,7 @@ Arch Linux package definitions for SHPIT-maintained command-line tools.
 
 | Package | Upstream | Notes |
 |---|---|---|
-| `meshix-cli-bin` | `shpitdev/meshix-observability` GitHub Releases | Public release assets. `makepkg` downloads the release tarball directly from GitHub Releases without any extra auth. |
+| `meshix-cli-bin` | `shpitdev/meshix-observability` GitHub Releases | Private release assets. Same auth model as `tabex-bin` and `osyrra-bin`. |
 | `tabex-bin` | `shpitdev/tabex` GitHub Releases | Private release assets. The PKGBUILD is public, but `makepkg` needs GitHub access to the `shpitdev` org to download the release tarball. |
 | `osyrra-bin` | `shpitdev/osyrra` GitHub Releases | Private release assets. Same auth model as `tabex-bin`. |
 
@@ -37,8 +37,7 @@ cd <package-dir>
 makepkg -si
 ```
 
-`meshix-cli-bin` uses public release assets, so it does not need any GitHub auth.
-`gh auth login` must still be configured with access to the `shpitdev` org before `makepkg` can download the private `tabex-bin` or `osyrra-bin` release assets.
+`gh auth login` must be configured with access to the `shpitdev` org before `makepkg` can download the private `meshix-cli-bin`, `tabex-bin`, or `osyrra-bin` release assets.
 
 After installing `tabex-bin`, start with:
 
@@ -52,12 +51,12 @@ The package includes an install hook that prints the same guidance after install
 
 - You can use this repo immediately without creating the AUR repositories or AUR secrets.
 - The scheduled/manual bump workflow uses the repository `GITHUB_TOKEN` for branch and PR operations in this repo.
-- Without `SHPIT_GH_TOKEN`, the workflow still updates `meshix-cli-bin` and skips the private package updates (`tabex-bin` and `osyrra-bin`).
+- Without `SHPIT_GH_TOKEN`, the workflow skips the private package updates (`meshix-cli-bin`, `tabex-bin`, and `osyrra-bin`).
 - Without AUR secrets, the publish workflow exits successfully without pushing anywhere.
 
 ## Secrets
 
-- `SHPIT_GH_TOKEN` — optional; required only for GitHub Actions to refresh the private SHPIT packages (`tabex-bin` and `osyrra-bin`) from their GitHub releases.
+- `SHPIT_GH_TOKEN` — optional; required for GitHub Actions to refresh the private SHPIT packages (`meshix-cli-bin`, `tabex-bin`, and `osyrra-bin`) from their GitHub releases.
 - `AUR_USERNAME`, `AUR_EMAIL`, `AUR_SSH_PRIVATE_KEY` — optional until you actually want to publish to AUR.
 
 ## Local Auth

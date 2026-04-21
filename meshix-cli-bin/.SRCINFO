@@ -6,9 +6,8 @@ pkgbase = meshix-cli-bin
 	install = meshix-cli-bin.install
 	arch = x86_64
 	license = LicenseRef-proprietary
+	makedepends = github-cli
 	provides = meshix-cli
 	conflicts = meshix-cli
-	source = https://github.com/shpitdev/meshix-observability/releases/download/v0.0.1/meshix-cli_v0.0.1_linux_amd64.tar.gz
-	sha256sums = a6f8fa1b8c12fa8705bc508efe13b8f462c375016edee0683ceb577370ac1911
 
 pkgname = meshix-cli-bin

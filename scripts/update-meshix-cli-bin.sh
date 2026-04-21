@@ -17,8 +17,36 @@ fi
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 pkgbuild="${repo_root}/meshix-cli-bin/PKGBUILD"
 repo="shpitdev/meshix-observability"
+requested_version="${MESHIX_CLI_VERSION:-latest}"
 
-release_json="$(gh api "repos/${repo}/releases/latest")"
+resolve_release_json() {
+  local version="$1"
+  local endpoint
+
+  if [[ -z "${version}" || "${version}" == "latest" ]]; then
+    endpoint="repos/${repo}/releases/latest"
+  else
+    if [[ "${version}" != v* ]]; then
+      version="v${version}"
+    fi
+    endpoint="repos/${repo}/releases/tags/${version}"
+  fi
+
+  if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
+    GH_TOKEN="${SHPIT_GH_TOKEN}" gh api "${endpoint}"
+  elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    if [[ "${optional}" == "true" ]]; then
+      echo "Skipping meshix-cli-bin: SHPIT_GH_TOKEN is not configured in GitHub Actions." >&2
+      exit 0
+    fi
+    echo "SHPIT_GH_TOKEN is required in GitHub Actions to read the private meshix-cli release." >&2
+    exit 1
+  else
+    gh api "${endpoint}"
+  fi
+}
+
+release_json="$(resolve_release_json "${requested_version}")"
 pkgver="$(jq -r '.tag_name | ltrimstr("v")' <<<"${release_json}")"
 asset_json="$(jq -c '
   .assets
@@ -30,19 +58,19 @@ sha256="$(jq -r '.digest // empty' <<<"${asset_json}")"
 
 if [[ -z "${release_asset}" || "${release_asset}" == "null" ]]; then
   if [[ "${optional}" == "true" ]]; then
-    echo "Skipping meshix-cli-bin: latest release is missing a linux amd64 archive." >&2
+    echo "Skipping meshix-cli-bin: release is missing a linux amd64 archive." >&2
     exit 0
   fi
-  echo "meshix-cli latest release is missing a linux amd64 archive" >&2
+  echo "meshix-cli release is missing a linux amd64 archive" >&2
   exit 1
 fi
 
 if [[ -z "${sha256}" || "${sha256}" == "null" ]]; then
   if [[ "${optional}" == "true" ]]; then
-    echo "Skipping meshix-cli-bin: latest release is missing an asset digest." >&2
+    echo "Skipping meshix-cli-bin: release is missing an asset digest." >&2
     exit 0
   fi
-  echo "meshix-cli latest release is missing an asset digest" >&2
+  echo "meshix-cli release is missing an asset digest" >&2
   exit 1
 fi
 
