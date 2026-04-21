@@ -1,7 +1,7 @@
 # Maintainer: Anand Pant
 
 pkgname=osyrra-bin
-pkgver=0.0.2
+pkgver=0.0.3
 pkgrel=1
 pkgdesc="Osyrra silent email worker and operator TUI"
 arch=('x86_64')
@@ -13,7 +13,7 @@ conflicts=('osyrra')
 
 # Public PKGBUILD, private release asset. Users need GitHub access to the shpitdev org.
 _asset="osyrra_v${pkgver}_linux_amd64.tar.gz"
-_sha256='b169ace1b18d2be22a264f57524728d3f0985787558c8e2ba6796c0a80b81e71'
+_sha256='0b2ba661104227faa1f4aff9579557633933544578d586abd5972f14802c810c'
 
 prepare() {
   gh release download "v${pkgver}" \
