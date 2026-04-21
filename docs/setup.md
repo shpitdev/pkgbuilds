@@ -117,5 +117,5 @@ When you are ready to publish to AUR:
 
 Replace the org-level token with a narrower machine credential when practical:
 
-1. Create a dedicated machine user token with only the repo access needed for private release reads on `shpitdev/tabex` and `shpitdev/osyrra`.
+1. Create a dedicated machine user token with only the repo access needed for private release reads on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`.
 2. Or use a GitHub App installation token flow for the cleanest long-term setup.
