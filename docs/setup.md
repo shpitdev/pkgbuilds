@@ -18,6 +18,13 @@ Result:
 - branch and PR creation use the repo `GITHUB_TOKEN`
 - `tabex-bin` and `osyrra-bin` update only if the repo has access to `SHPIT_GH_TOKEN`
 - AUR publishing is skipped without failing
+- upstream `tabex` and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`, but that depends on `SHPIT_WORKFLOW_DISPATCH_TOKEN` being available in their Depot CI repo secrets
+
+## GitHub UI Links
+
+- create PAT: <https://github.com/settings/personal-access-tokens>
+- review active org PATs: <https://github.com/organizations/shpitdev/settings/personal-access-tokens/active>
+- manage org Actions secrets: <https://github.com/organizations/shpitdev/settings/secrets/actions>
 
 ## SHPIT_GH_TOKEN
 
@@ -33,6 +40,35 @@ gh secret set SHPIT_GH_TOKEN \
 ```
 
 If you later want to narrow or broaden repo access without changing the secret value, rerun the same command with a different repo list.
+
+## SHPIT_WORKFLOW_DISPATCH_TOKEN
+
+Create a fine-grained PAT that can trigger workflow dispatches in:
+
+- `shpitdev/homebrew-tap`
+- `shpitdev/pkgbuilds`
+
+Store that PAT as the GitHub org secret `SHPIT_WORKFLOW_DISPATCH_TOKEN` with `selected` visibility for these producer repos:
+
+- `shpitdev/tabex`
+- `shpitdev/osyrra`
+
+Those producer release workflows run in Depot CI, so GitHub org secrets are not enough on their own. Mirror the same secret into Depot for each producer repo with one of these paths:
+
+```bash
+cd /home/anandpant/Development/shpitdev/tabex
+depot ci migrate secrets-and-vars -y
+
+cd /home/anandpant/Development/shpitdev/osyrra
+depot ci migrate secrets-and-vars -y
+```
+
+Or add the Depot secrets directly:
+
+```bash
+depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/tabex
+depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/osyrra
+```
 
 ## Local Operator Flow
 
