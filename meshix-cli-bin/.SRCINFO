@@ -1,6 +1,6 @@
 pkgbase = meshix-cli-bin
 	pkgdesc = Meshix CLI for run inspection and generation workflows
-	pkgver = 0.0.1
+	pkgver = 0.0.2
 	pkgrel = 1
 	url = https://github.com/shpitdev/meshix-observability
 	install = meshix-cli-bin.install
