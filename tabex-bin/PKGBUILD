@@ -1,7 +1,7 @@
 # Maintainer: Anand Pant
 
 pkgname=tabex-bin
-pkgver=0.0.5
+pkgver=0.0.6
 pkgrel=1
 pkgdesc="Tabex CLI for browser session, capture, and page inspection"
 arch=('x86_64')
@@ -14,7 +14,7 @@ conflicts=('tabex')
 
 # Public PKGBUILD, private release asset. Users need GitHub access to the shpitdev org.
 _asset="tabex_v${pkgver}_linux_amd64.tar.gz"
-_sha256='c29a17a401d8a478a3e8f77031e950d0d3bfab8e4bb07d9111a48ab341860c22'
+_sha256='e1eaf7c612fdca03682f75923457de45eba103b71864675414b0e7104e6c5156'
 
 prepare() {
   gh release download "v${pkgver}" \
