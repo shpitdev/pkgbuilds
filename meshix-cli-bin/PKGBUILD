@@ -1,11 +1,11 @@
 # Maintainer: Anand Pant
 
 pkgname=meshix-cli-bin
-pkgver=0.0.2
+pkgver=0.0.5
 pkgrel=1
 pkgdesc="Meshix CLI for run inspection and generation workflows"
 arch=('x86_64')
-url="https://github.com/shpitdev/meshix-observability"
+url="https://github.com/shpitdev/meshix-mono"
 license=('LicenseRef-proprietary')
 install="${pkgname}.install"
 makedepends=('github-cli')
@@ -14,11 +14,11 @@ conflicts=('meshix-cli')
 
 # Public PKGBUILD, private release asset. Users need GitHub access to the shpitdev org.
 _asset="meshix-cli_v${pkgver}_linux_amd64.tar.gz"
-_sha256='e5446f112d1277cda436d2ecce972b96b409a6fbaf57020690f4a0711d1f06e0'
+_sha256='669f98ea36a220b24210f390426eac251eb4707e0bc94bf89fd6195366d703d7'
 
 prepare() {
-  gh release download "v${pkgver}" \
-    --repo shpitdev/meshix-observability \
+  gh release download "meshix-cli-v${pkgver}" \
+    --repo shpitdev/meshix-mono \
     --pattern "${_asset}" \
     --dir . --clobber
 

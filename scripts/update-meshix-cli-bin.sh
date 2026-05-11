@@ -16,21 +16,34 @@ fi
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 pkgbuild="${repo_root}/meshix-cli-bin/PKGBUILD"
-repo="shpitdev/meshix-observability"
+repo="shpitdev/meshix-mono"
 requested_version="${MESHIX_CLI_VERSION:-latest}"
+
+normalize_release_tag() {
+  local version="$1"
+
+  if [[ -z "${version}" || "${version}" == "latest" ]]; then
+    printf 'latest'
+    return 0
+  fi
+
+  version="${version#meshix-cli-}"
+  version="${version#v}"
+  printf 'meshix-cli-v%s' "${version}"
+}
 
 resolve_release_json() {
   local version="$1"
   local endpoint
+  local release_tag
   local output=""
 
-  if [[ -z "${version}" || "${version}" == "latest" ]]; then
+  release_tag="$(normalize_release_tag "${version}")"
+
+  if [[ "${release_tag}" == "latest" ]]; then
     endpoint="repos/${repo}/releases/latest"
   else
-    if [[ "${version}" != v* ]]; then
-      version="v${version}"
-    fi
-    endpoint="repos/${repo}/releases/tags/${version}"
+    endpoint="repos/${repo}/releases/tags/${release_tag}"
   fi
 
   if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
@@ -62,7 +75,9 @@ release_json="$(resolve_release_json "${requested_version}")"
 if [[ "${release_json}" == "__SKIP__" ]]; then
   exit 0
 fi
-pkgver="$(jq -r '.tag_name | ltrimstr("v")' <<<"${release_json}")"
+tag_name="$(jq -r '.tag_name' <<<"${release_json}")"
+pkgver="${tag_name#meshix-cli-v}"
+pkgver="${pkgver#v}"
 asset_json="$(jq -c '
   .assets
   | map(select(.name | test("_linux_amd64\\.tar\\.gz$")))
