@@ -1,7 +1,7 @@
 # Maintainer: Anand Pant
 
 pkgname=meshix-cli-bin
-pkgver=0.0.7
+pkgver=0.0.9
 pkgrel=1
 pkgdesc="Meshix CLI for run inspection and generation workflows"
 arch=('x86_64')
@@ -14,7 +14,7 @@ conflicts=('meshix-cli')
 
 # Public PKGBUILD, private release asset. Users need GitHub access to the shpitdev org.
 _asset="meshix-cli_v${pkgver}_linux_amd64.tar.gz"
-_sha256='07c5ba24eeb4f6a7fc15ab8f2e0c3f3acfa621058ecf8f2e0b2c5af614d63aee'
+_sha256='4226d9cfcbc25e21ca9e12ac93c2b9dfaf785fbbb13dfb3e63b92ea4f7659669'
 
 prepare() {
   gh release download "meshix-cli-v${pkgver}" \
