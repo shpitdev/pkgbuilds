@@ -33,26 +33,50 @@ fetch_release_by_tag() {
 
 fetch_release_with_assets() {
   local include_prereleases="$1"
+  local releases_json
 
   if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
-    GH_TOKEN="${SHPIT_GH_TOKEN}" gh api --paginate "repos/${repo}/releases"
+    releases_json="$(GH_TOKEN="${SHPIT_GH_TOKEN}" gh api --paginate "repos/${repo}/releases")" || return
   else
-    gh api --paginate "repos/${repo}/releases"
-  fi | jq -s -c --arg asset_prefix "${asset_prefix}" --argjson include_prereleases "${include_prereleases}" '
+    releases_json="$(gh api --paginate "repos/${repo}/releases")" || return
+  fi
+
+  jq -s -c --arg asset_prefix "${asset_prefix}" --argjson include_prereleases "${include_prereleases}" '
     add
     | map(select(.draft | not))
     | map(select($include_prereleases or (.prerelease | not)))
     | map(select(any(.assets[]?; (.name | test("^" + $asset_prefix + "_.*_linux_amd64\\.tar\\.gz$")))))
     | first // empty
-  '
+  ' <<<"${releases_json}"
 }
 
 if [[ -n "${release_tag}" ]]; then
-  release_json="$(fetch_release_by_tag "${release_tag}")"
+  if ! release_json="$(fetch_release_by_tag "${release_tag}")"; then
+    if [[ "${optional}" == "true" ]]; then
+      echo "Skipping foundry-cli-bin: SHPIT_GH_TOKEN does not currently grant release access to ${repo}." >&2
+      exit 0
+    fi
+    echo "Unable to read the private foundry-cli release in ${repo}." >&2
+    exit 1
+  fi
 elif [[ -n "${SHPIT_GH_TOKEN:-}" || -z "${GITHUB_ACTIONS:-}" ]]; then
-  release_json="$(fetch_release_with_assets false)"
+  if ! release_json="$(fetch_release_with_assets false)"; then
+    if [[ "${optional}" == "true" ]]; then
+      echo "Skipping foundry-cli-bin: SHPIT_GH_TOKEN does not currently grant release access to ${repo}." >&2
+      exit 0
+    fi
+    echo "Unable to read the private foundry-cli releases in ${repo}." >&2
+    exit 1
+  fi
   if [[ -z "${release_json}" || "${release_json}" == "null" ]]; then
-    release_json="$(fetch_release_with_assets true)"
+    if ! release_json="$(fetch_release_with_assets true)"; then
+      if [[ "${optional}" == "true" ]]; then
+        echo "Skipping foundry-cli-bin: SHPIT_GH_TOKEN does not currently grant release access to ${repo}." >&2
+        exit 0
+      fi
+      echo "Unable to read the private foundry-cli releases in ${repo}." >&2
+      exit 1
+    fi
   fi
 elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
   if [[ "${optional}" == "true" ]]; then
