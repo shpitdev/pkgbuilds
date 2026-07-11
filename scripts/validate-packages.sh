@@ -9,6 +9,9 @@ for package_dir in "${repo_root}"/*; do
   "${repo_root}/scripts/validate-package.sh" "${package_dir}"
 done
 
+"${repo_root}/scripts/validate-foundry-cli-archive.test.sh"
+"${repo_root}/scripts/select-foundry-cli-asset.test.sh"
+
 meshix_pkg="${repo_root}/meshix-cli-bin"
 if [[ -f "${meshix_pkg}/PKGBUILD" ]]; then
   grep -q 'gh release download "meshix-cli-v${pkgver}"' "${meshix_pkg}/PKGBUILD"
