@@ -1,7 +1,7 @@
 # Maintainer: Anand Pant
 
 pkgname=meshix-cli-bin
-pkgver=0.0.21
+pkgver=0.0.22_next.62
 pkgrel=1
 pkgdesc="Meshix CLI for run inspection and generation workflows"
 arch=('x86_64')
@@ -9,15 +9,17 @@ url="https://github.com/shpitdev/meshix-mono"
 license=('LicenseRef-proprietary')
 install="${pkgname}.install"
 makedepends=('github-cli')
+depends=('nodejs')
 provides=('meshix-cli')
 conflicts=('meshix-cli')
 
 # Public PKGBUILD, private release asset. Users need GitHub access to the shpitdev org.
-_asset="meshix-cli_v${pkgver}_linux_amd64.tar.gz"
-_sha256='07d8cb835bd1073be6debe541a75ec6ca74e6bb175faf43f0bc19817dc568017'
+_release_version="${pkgver//_/-}"
+_asset="meshix-cli_v${_release_version}_linux_amd64.tar.gz"
+_sha256='019373f4344a7bd42e85990264fa84d793f24077f1d00292bbe7fb79eaf473b6'
 
 prepare() {
-  gh release download "meshix-cli-v${pkgver}" \
+  gh release download "meshix-cli-v${_release_version}" \
     --repo shpitdev/meshix-mono \
     --pattern "${_asset}" \
     --dir . --clobber
@@ -27,6 +29,6 @@ prepare() {
 }
 
 package() {
-  install -Dm755 "meshix-cli_v${pkgver}_linux_amd64/meshix-cli" \
+  install -Dm755 "meshix-cli_v${_release_version}_linux_amd64/meshix-cli" \
     "${pkgdir}/usr/bin/meshix-cli"
 }
