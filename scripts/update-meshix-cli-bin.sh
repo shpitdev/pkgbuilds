@@ -78,6 +78,9 @@ fi
 tag_name="$(jq -r '.tag_name' <<<"${release_json}")"
 pkgver="${tag_name#meshix-cli-v}"
 pkgver="${pkgver#v}"
+# Arch package versions cannot contain hyphens. The PKGBUILD maps underscores
+# back to release-tag hyphens when resolving the GitHub asset.
+pkgver="${pkgver//-/_}"
 asset_json="$(jq -c '
   .assets
   | map(select(.name | test("_linux_amd64\\.tar\\.gz$")))
