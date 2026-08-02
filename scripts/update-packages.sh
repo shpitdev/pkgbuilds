@@ -8,9 +8,8 @@ if (($# == 0)); then
 fi
 
 if [[ "$1" == "auto" ]]; then
-  packages=(meshix-cli-bin foundry-cli-bin)
+  packages=(meshix-cli-bin foundry-cli-bin tabex-bin)
   if [[ -n "${SHPIT_GH_TOKEN:-}" || -z "${GITHUB_ACTIONS:-}" ]]; then
-    packages+=(tabex-bin)
     packages+=(osyrra-bin)
   fi
 elif [[ "$1" == "all" ]]; then

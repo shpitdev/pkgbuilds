@@ -7,9 +7,9 @@ Arch Linux package definitions for SHPIT-maintained command-line tools.
 | Package | Upstream | Notes |
 |---|---|---|
 | `foundry-cli-bin` | `shpitdev/foundry-cli` GitHub Releases | Private release assets. Same auth model as the other SHPIT packages. |
-| `meshix-cli-bin` | `shpitdev/meshix-observability` GitHub Releases | Private release assets. Same auth model as `tabex-bin` and `osyrra-bin`. |
-| `tabex-bin` | `shpitdev/tabex` GitHub Releases | Private release assets. The PKGBUILD is public, but `makepkg` needs GitHub access to the `shpitdev` org to download the release tarball. |
-| `osyrra-bin` | `shpitdev/osyrra` GitHub Releases | Private release assets. Same auth model as `tabex-bin`. |
+| `meshix-cli-bin` | `shpitdev/meshix-observability` GitHub Releases | Private release assets. Same auth model as `osyrra-bin`. |
+| `tabex-bin` | `shpitdev/pkgbuilds` GitHub Releases | Public binary release assets mirrored from the private Tabex release after digest and archive verification. No GitHub credentials are required to install a mirrored version. |
+| `osyrra-bin` | `shpitdev/osyrra` GitHub Releases | Private release assets. Same auth model as `meshix-cli-bin`. |
 
 ## Automation
 
@@ -38,7 +38,7 @@ cd <package-dir>
 makepkg -si
 ```
 
-`gh auth login` must be configured with access to the `shpitdev` org before `makepkg` can download the private `foundry-cli-bin`, `meshix-cli-bin`, `tabex-bin`, or `osyrra-bin` release assets.
+`gh auth login` must be configured with access to the `shpitdev` org before `makepkg` can download the private `foundry-cli-bin`, `meshix-cli-bin`, or `osyrra-bin` release assets. Tabex versions published through the public binary channel need no GitHub credentials.
 
 After installing `tabex-bin`, start with:
 
@@ -52,12 +52,12 @@ The package includes an install hook that prints the same guidance after install
 
 - You can use this repo immediately without creating the AUR repositories or AUR secrets.
 - The scheduled/manual bump workflow uses the repository `GITHUB_TOKEN` for branch and PR operations in this repo.
-- Without `SHPIT_GH_TOKEN`, the workflow skips the private package updates (`foundry-cli-bin`, `meshix-cli-bin`, `tabex-bin`, and `osyrra-bin`).
+- Without `SHPIT_GH_TOKEN`, the workflow skips the private package updates (`foundry-cli-bin`, `meshix-cli-bin`, and `osyrra-bin`). Public Tabex package updates remain available.
 - Without AUR secrets, the publish workflow exits successfully without pushing anywhere.
 
 ## Secrets
 
-- `SHPIT_GH_TOKEN` — optional; required for GitHub Actions to refresh the private SHPIT packages (`foundry-cli-bin`, `meshix-cli-bin`, `tabex-bin`, and `osyrra-bin`) from their GitHub releases.
+- `SHPIT_GH_TOKEN` — optional for routine version bumps; required by the trusted `publish-tabex-release` workflow only to read an exact stable release from the private Tabex repository. The workflow uses its repository-scoped token to trigger the local package bump only after the public mirror verifies. The secret is also required to refresh the other private SHPIT packages.
 - `AUR_USERNAME`, `AUR_EMAIL`, `AUR_SSH_PRIVATE_KEY` — optional until you actually want to publish to AUR.
 
 ## Local Auth
@@ -76,7 +76,7 @@ The package includes an install hook that prints the same guidance after install
 
 1. Create the GitHub repository and enable Actions.
 2. In `Settings -> Actions -> General`, set workflow permissions to read and write, and enable GitHub Actions to create pull requests.
-3. Attach the `SHPIT_GH_TOKEN` secret (org-level or repo-level) to this repo so the bump workflow can read the private release assets.
+3. Attach the `SHPIT_GH_TOKEN` secret (org-level or repo-level) to this repo so the Tabex publisher and private-package bump paths can read their private release assets.
 4. When the AUR repos exist, add `AUR_USERNAME`, `AUR_EMAIL`, and `AUR_SSH_PRIVATE_KEY`.
 5. Run `version-bumps` manually once, confirm the PR output, then merge.
 6. After the first merge, `publish.yml` will start pushing package updates to AUR only if those AUR secrets are present.

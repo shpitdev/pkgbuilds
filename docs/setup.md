@@ -10,15 +10,17 @@ Use this first.
    - set workflow permissions to `Read and write`
    - enable `Allow GitHub Actions to create and approve pull requests`
 4. Do not add any AUR secrets yet.
-5. Attach `SHPIT_GH_TOKEN` if you want Actions to bump the private SHPIT packages.
+5. Attach `SHPIT_GH_TOKEN` if you want Actions to bump private SHPIT packages or publish verified Tabex binaries from the private source release.
 6. Run the `version-bumps` workflow manually.
 
 Result:
 
 - branch and PR creation use the repo `GITHUB_TOKEN`
-- `meshix-cli-bin`, `tabex-bin`, and `osyrra-bin` update only if the repo has access to `SHPIT_GH_TOKEN`
+- `meshix-cli-bin` and `osyrra-bin` update only if the repo has access to `SHPIT_GH_TOKEN`
+- `tabex-bin` updates anonymously after an exact stable Tabex release has been mirrored publicly
 - AUR publishing is skipped without failing
-- upstream `meshix-observability`, `tabex`, and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`, but that depends on `SHPIT_WORKFLOW_DISPATCH_TOKEN` being available in their producer-repo Depot CI secrets
+- upstream `meshix-observability` and `osyrra` release workflows can trigger the version-bump workflow directly
+- the Tabex release workflow instead dispatches `publish-tabex-release.yml`; that trusted workflow verifies and publishes the exact public mirror before it triggers the local version bump
 
 ## GitHub UI Links
 
@@ -28,7 +30,7 @@ Result:
 
 ## SHPIT_GH_TOKEN
 
-Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. An org-level secret with `selected` visibility is the cleanest option if you have multiple consuming repos.
+Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. The Tabex publisher uses it only for the private source read; publication and the same-repository bump dispatch use the workflow's repository-scoped token. An org-level secret with `selected` visibility is the cleanest option if you have multiple consuming repos.
 
 Attach it to this repo with:
 
