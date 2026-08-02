@@ -1,0 +1,40 @@
+name: publish-tabex-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Exact stable private Tabex release tag to mirror (for example v0.0.12)
+        required: true
+        type: string
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: publish-tabex-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted publisher
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+
+      - name: Publish verified public binary assets
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          SOURCE_GITHUB_TOKEN: ${{ secrets.SHPIT_GH_TOKEN }}
+          TARGET_GITHUB_TOKEN: ${{ github.token }}
+          TARGET_REPOSITORY: ${{ github.repository }}
+        run: ./scripts/publish-tabex-release.sh "${RELEASE_TAG}"
+
+      - name: Trigger pkgbuilds metadata bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run version-bumps.yml --repo "${{ github.repository }}" --ref main

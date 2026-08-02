@@ -26,3 +26,7 @@ if [[ -f "${tabex_pkg}/PKGBUILD" ]]; then
   grep -q 'install="${pkgname}\.install"' "${tabex_pkg}/PKGBUILD"
   grep -q 'tabex setup' "${tabex_pkg}/tabex-bin.install"
 fi
+
+bash -n "${repo_root}/scripts/publish-tabex-release.sh"
+"${repo_root}/scripts/publish-tabex-release.test.sh"
+"${repo_root}/scripts/update-tabex-bin.test.sh"

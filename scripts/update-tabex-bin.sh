@@ -16,25 +16,33 @@ fi
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 pkgbuild="${repo_root}/tabex-bin/PKGBUILD"
-repo="shpitdev/tabex"
+repo="shpitdev/pkgbuilds"
 
-if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
-  release_json="$(GH_TOKEN="${SHPIT_GH_TOKEN}" gh api "repos/${repo}/releases/latest")"
-elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+releases_json="$(gh api --paginate "repos/${repo}/releases?per_page=100" --slurp)"
+release_json="$(jq -c '
+  [
+    .[][]
+    | select(.draft == false and .prerelease == false)
+    | select(.tag_name | test("^tabex-v[0-9]+\\.[0-9]+\\.[0-9]+$"))
+  ]
+  | sort_by(.tag_name | sub("^tabex-v"; "") | split(".") | map(tonumber))
+  | last // empty
+' <<<"${releases_json}")"
+
+if [[ -z "${release_json}" ]]; then
   if [[ "${optional}" == "true" ]]; then
-    echo "Skipping tabex-bin: SHPIT_GH_TOKEN is not configured in GitHub Actions." >&2
+    echo "Skipping tabex-bin: no public stable Tabex binary release exists yet." >&2
     exit 0
   fi
-  echo "SHPIT_GH_TOKEN is required in GitHub Actions to read the private tabex release." >&2
+  echo "No public stable Tabex binary release exists in ${repo}." >&2
   exit 1
-else
-  release_json="$(gh api "repos/${repo}/releases/latest")"
 fi
 
-pkgver="$(jq -r '.tag_name | ltrimstr("v")' <<<"${release_json}")"
+public_tag="$(jq -r '.tag_name' <<<"${release_json}")"
+pkgver="${public_tag#tabex-v}"
 asset_json="$(jq -c '
   .assets
-  | map(select(.name | test("_linux_amd64\\.tar\\.gz$")))
+  | map(select(.name == "tabex_v'"${pkgver}"'_linux_amd64.tar.gz"))
   | first
 ' <<<"${release_json}")"
 release_asset="$(jq -r '.name // empty' <<<"${asset_json}")"
@@ -60,7 +68,28 @@ fi
 
 sha256="${sha256#sha256:}"
 
-perl -0pi -e "s/^pkgver=.*/pkgver=${pkgver}/m" "${pkgbuild}"
-perl -0pi -e "s/^_sha256=.*/_sha256='${sha256}'/m" "${pkgbuild}"
+cat > "${pkgbuild}" <<EOF
+# Maintainer: Anand Pant
+
+pkgname=tabex-bin
+pkgver=${pkgver}
+pkgrel=1
+pkgdesc="Tabex CLI for browser session, capture, and page inspection"
+arch=('x86_64')
+url="https://tabex.dev"
+license=('LicenseRef-proprietary')
+install="\${pkgname}.install"
+provides=('tabex')
+conflicts=('tabex')
+
+_asset="tabex_v\${pkgver}_linux_amd64.tar.gz"
+source=("https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v\${pkgver}/\${_asset}")
+sha256sums=('${sha256}')
+
+package() {
+  install -Dm755 "tabex_v\${pkgver}_linux_amd64/tabex" \
+    "\${pkgdir}/usr/bin/tabex"
+}
+EOF
 
 "${repo_root}/scripts/render-srcinfo.sh" "${repo_root}/tabex-bin"
