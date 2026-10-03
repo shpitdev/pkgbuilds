@@ -1,7 +1,7 @@
 # Maintainer: Anand Pant
 
 pkgname=tabex-bin
-pkgver=0.0.13
+pkgver=0.0.15
 pkgrel=1
 pkgdesc="Tabex CLI for browser session, capture, and page inspection"
 arch=('x86_64')
@@ -13,7 +13,7 @@ conflicts=('tabex')
 
 _asset="tabex_v${pkgver}_linux_amd64.tar.gz"
 source=("https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v${pkgver}/${_asset}")
-sha256sums=('8e5a8d1c0c0b8a5fed86be10bf7c3bcbdcbf92f40cd3c81ca3a041567d5fa091')
+sha256sums=('c7db197e05d974f651840fc5ce0454744144aed8434f89d1f75a3aeecdfdb411')
 
 package() {
   install -Dm755 "tabex_v${pkgver}_linux_amd64/tabex"     "${pkgdir}/usr/bin/tabex"
