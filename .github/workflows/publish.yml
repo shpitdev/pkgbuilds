@@ -2,6 +2,17 @@ name: publish
 
 on:
   workflow_dispatch:
+    inputs:
+      package:
+        description: Publish only this package (changed detects changed packages)
+        type: choice
+        options:
+          - changed
+          - foundry-cli-bin
+          - meshix-cli-bin
+          - tabex-bin
+          - osyrra-bin
+        default: changed
   push:
     branches:
       - main
@@ -23,11 +34,23 @@ jobs:
 
       - name: Find updated packages
         id: collect
+        env:
+          TARGET_PACKAGE: ${{ inputs.package }}
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
 
-          before="${{ github.event.before }}"
+          if [[ -n "$TARGET_PACKAGE" && "$TARGET_PACKAGE" != changed ]]; then
+            case "$TARGET_PACKAGE" in
+              foundry-cli-bin|meshix-cli-bin|tabex-bin|osyrra-bin) ;;
+              *) echo 'Unknown package' >&2; exit 1 ;;
+            esac
+            [[ -f "$TARGET_PACKAGE/PKGBUILD" ]]
+            echo "packages=$(jq -cn --arg package "$TARGET_PACKAGE" '[$package]')" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          before="$BEFORE_SHA"
           if [[ -z "${before}" || "${before}" =~ ^0+$ ]]; then
             before="$(git rev-list --max-parents=0 HEAD)"
           fi
@@ -66,6 +89,8 @@ jobs:
 
       - name: Check publishing configuration
         id: config
+        env:
+          PACKAGE: ${{ matrix.package }}
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -74,6 +99,9 @@ jobs:
           else
             echo 'enabled=false' >> "${GITHUB_OUTPUT}"
             echo "AUR publish skipped: AUR secrets are not configured."
+            if [[ "$PACKAGE" == foundry-cli-bin ]]; then
+              exit 1
+            fi
           fi
 
       - name: Install publish dependencies
