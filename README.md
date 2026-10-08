@@ -13,7 +13,8 @@ Arch Linux package definitions for SHPIT-maintained command-line tools.
 
 ## Automation
 
-- `.github/workflows/version-bumps.yml` runs on a schedule or manual dispatch, updates package versions/checksums via repo-owned scripts, regenerates `.SRCINFO`, and opens or updates a PR.
+- `.github/workflows/version-bumps.yml` keeps non-Foundry packages in the scheduled rolling PR. Dispatching with `foundry_cli_release_tag=vX.Y.Z` updates only Foundry CLI on a dedicated branch, opens a PR, validates it in the job, and squash-merges it with `SHPIT_GH_TOKEN`. That token needs private release read access plus contents and pull-request write access in this repo.
+- Equal or older versions are no-ops. `dry_run=true` creates and validates a draft PR, including for an older tag, but never merges or publishes. Do not merge dry-run PRs. Validation failures leave the candidate PR open and the job red.
 - `.github/workflows/validate.yml` is non-mutating PR validation. It checks PKGBUILD syntax and confirms `.SRCINFO` is in sync.
 - `.github/workflows/publish.yml` publishes every changed package directory to the AUR after changes land on `main`, but cleanly skips publishing until AUR secrets exist.
 
@@ -80,3 +81,13 @@ The package includes an install hook that prints the same guidance after install
 4. When the AUR repos exist, add `AUR_USERNAME`, `AUR_EMAIL`, and `AUR_SSH_PRIVATE_KEY`.
 5. Run `version-bumps` manually once, confirm the PR output, then merge.
 6. After the first merge, `publish.yml` will start pushing package updates to AUR only if those AUR secrets are present.
+
+### Foundry CLI AUR recovery
+
+The real-actor package PR merge triggers `publish.yml` on main. Missing AUR
+credentials fail the Foundry CLI publish job. To retry publishing an already
+merged version without touching other packages:
+
+```sh
+gh workflow run publish.yml --repo shpitdev/pkgbuilds --ref main -f package=foundry-cli-bin
+```

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016 # Assertions intentionally match literal PKGBUILD variables.
 set -euo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -30,3 +31,6 @@ fi
 bash -n "${repo_root}/scripts/publish-tabex-release.sh"
 "${repo_root}/scripts/publish-tabex-release.test.sh"
 "${repo_root}/scripts/update-tabex-bin.test.sh"
+
+"${repo_root}/scripts/bump-foundry-cli-release.test.sh"
+"${repo_root}/scripts/validate-foundry-cli-checksum.test.sh"
