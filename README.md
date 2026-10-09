@@ -84,7 +84,9 @@ The package includes an install hook that prints the same guidance after install
 
 ### Foundry CLI AUR recovery
 
-The real-actor package PR merge triggers `publish.yml` on main. Missing AUR
+The real-actor package PR merge triggers `publish.yml` on main. Foundry CLI
+publishing compares version and package revision against AUR after cloning;
+equal or older retries are no-ops, and concurrent stale pushes fail without force. Missing AUR
 credentials fail the Foundry CLI publish job. To retry publishing an already
 merged version without touching other packages:
 

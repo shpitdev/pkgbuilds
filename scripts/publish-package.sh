@@ -20,10 +20,33 @@ trap 'rm -rf "${workdir}"' EXIT
 
 git clone "ssh://aur@aur.archlinux.org/${package_name}.git" "${workdir}/${package_name}"
 
+# A retry can refer to an older main commit than the version already in AUR.
+# Compare after cloning; a concurrent newer push after this point is rejected
+# by the ordinary non-force git push below.
+if [[ "$package_name" == foundry-cli-bin && -f "$workdir/$package_name/.SRCINFO" ]]; then
+  read_release() {
+    local file="$1" version revision
+    version="$(sed -n 's/^[[:space:]]*pkgver = //p' "$file")"
+    revision="$(sed -n 's/^[[:space:]]*pkgrel = //p' "$file")"
+    [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$revision" =~ ^[0-9]+$ ]] || {
+      echo "Invalid Foundry CLI AUR version metadata" >&2
+      return 1
+    }
+    printf '%s-%s\n' "$version" "$revision"
+  }
+  candidate="$(read_release "$repo_root/$package_dir/.SRCINFO")"
+  published="$(read_release "$workdir/$package_name/.SRCINFO")"
+  newest="$(printf '%s\n' "$candidate" "$published" | sort -V | tail -n1)"
+  if [[ "$candidate" == "$published" || "$newest" != "$candidate" ]]; then
+    echo "No AUR changes: Foundry CLI $published is already published; refusing replay of $candidate."
+    exit 0
+  fi
+fi
+
 find "${workdir}/${package_name}" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
 
 while IFS= read -r tracked_file; do
-  relative_path="${tracked_file#${package_dir}/}"
+  relative_path="${tracked_file#"${package_dir}"/}"
   install -d "${workdir}/${package_name}/$(dirname "${relative_path}")"
   cp -a "${repo_root}/${tracked_file}" "${workdir}/${package_name}/${relative_path}"
 done < <(git -C "${repo_root}" ls-files -- "${package_dir}")
