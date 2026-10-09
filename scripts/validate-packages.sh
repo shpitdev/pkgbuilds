@@ -34,3 +34,4 @@ bash -n "${repo_root}/scripts/publish-tabex-release.sh"
 
 "${repo_root}/scripts/bump-foundry-cli-release.test.sh"
 "${repo_root}/scripts/validate-foundry-cli-checksum.test.sh"
+"${repo_root}/scripts/publish-foundry-cli.test.sh"
