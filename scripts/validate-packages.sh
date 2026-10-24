@@ -13,15 +13,6 @@ done
 "${repo_root}/scripts/validate-foundry-cli-archive.test.sh"
 "${repo_root}/scripts/select-foundry-cli-asset.test.sh"
 
-meshix_pkg="${repo_root}/meshix-cli-bin"
-if [[ -f "${meshix_pkg}/PKGBUILD" ]]; then
-  grep -q "depends=('nodejs')" "${meshix_pkg}/PKGBUILD"
-  grep -q '_release_version="${pkgver//_/-}"' "${meshix_pkg}/PKGBUILD"
-  grep -q 'gh release download "meshix-cli-v${_release_version}"' "${meshix_pkg}/PKGBUILD"
-  grep -q 'install="${pkgname}\.install"' "${meshix_pkg}/PKGBUILD"
-  grep -q 'meshix-cli-dev' "${meshix_pkg}/meshix-cli-bin.install"
-fi
-
 tabex_pkg="${repo_root}/tabex-bin"
 if [[ -f "${tabex_pkg}/PKGBUILD" ]]; then
   grep -q 'install="${pkgname}\.install"' "${tabex_pkg}/PKGBUILD"

@@ -7,9 +7,8 @@ Arch Linux package definitions for SHPIT-maintained command-line tools.
 | Package | Upstream | Notes |
 |---|---|---|
 | `foundry-cli-bin` | `shpitdev/foundry-cli` GitHub Releases | Private release assets. Same auth model as the other SHPIT packages. |
-| `meshix-cli-bin` | `shpitdev/meshix-observability` GitHub Releases | Private release assets. Same auth model as `osyrra-bin`. |
 | `tabex-bin` | `shpitdev/pkgbuilds` GitHub Releases | Public binary release assets mirrored from the private Tabex release after digest and archive verification. No GitHub credentials are required to install a mirrored version. |
-| `osyrra-bin` | `shpitdev/osyrra` GitHub Releases | Private release assets. Same auth model as `meshix-cli-bin`. |
+| `osyrra-bin` | `shpitdev/osyrra` GitHub Releases | Private release assets. Same auth model as the other SHPIT packages. |
 
 ## Automation
 
@@ -39,7 +38,7 @@ cd <package-dir>
 makepkg -si
 ```
 
-`gh auth login` must be configured with access to the `shpitdev` org before `makepkg` can download the private `foundry-cli-bin`, `meshix-cli-bin`, or `osyrra-bin` release assets. Tabex versions published through the public binary channel need no GitHub credentials.
+`gh auth login` must be configured with access to the `shpitdev` org before `makepkg` can download the private `foundry-cli-bin` or `osyrra-bin` release assets. Tabex versions published through the public binary channel need no GitHub credentials.
 
 After installing `tabex-bin`, start with:
 
@@ -53,7 +52,7 @@ The package includes an install hook that prints the same guidance after install
 
 - You can use this repo immediately without creating the AUR repositories or AUR secrets.
 - The scheduled/manual bump workflow uses the repository `GITHUB_TOKEN` for branch and PR operations in this repo.
-- Without `SHPIT_GH_TOKEN`, the workflow skips the private package updates (`foundry-cli-bin`, `meshix-cli-bin`, and `osyrra-bin`). Public Tabex package updates remain available.
+- Without `SHPIT_GH_TOKEN`, the workflow skips the private package updates (`foundry-cli-bin` and `osyrra-bin`). Public Tabex package updates remain available.
 - Without AUR secrets, the publish workflow exits successfully without pushing anywhere.
 
 ## Secrets

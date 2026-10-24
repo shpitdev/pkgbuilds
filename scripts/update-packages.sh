@@ -8,13 +8,12 @@ if (($# == 0)); then
 fi
 
 if [[ "$1" == "auto" ]]; then
-  packages=(meshix-cli-bin tabex-bin)
+  packages=(tabex-bin)
   if [[ -n "${SHPIT_GH_TOKEN:-}" || -z "${GITHUB_ACTIONS:-}" ]]; then
     packages+=(osyrra-bin)
   fi
 elif [[ "$1" == "all" ]]; then
   packages=(
-    meshix-cli-bin
     foundry-cli-bin
     tabex-bin
     osyrra-bin
@@ -25,13 +24,6 @@ fi
 
 for package in "${packages[@]}"; do
   case "${package}" in
-    meshix-cli-bin)
-      if [[ "$1" == "auto" ]]; then
-        "${repo_root}/scripts/update-meshix-cli-bin.sh" --optional
-      else
-        "${repo_root}/scripts/update-meshix-cli-bin.sh"
-      fi
-      ;;
     foundry-cli-bin)
       if [[ "$1" == "auto" ]]; then
         "${repo_root}/scripts/update-foundry-cli-bin.sh" --optional

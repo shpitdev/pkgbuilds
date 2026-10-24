@@ -16,10 +16,10 @@ Use this first.
 Result:
 
 - branch and PR creation use the repo `GITHUB_TOKEN`
-- `meshix-cli-bin` and `osyrra-bin` update only if the repo has access to `SHPIT_GH_TOKEN`
+- `osyrra-bin` updates only if the repo has access to `SHPIT_GH_TOKEN`
 - `tabex-bin` updates anonymously after an exact stable Tabex release has been mirrored publicly
 - AUR publishing is skipped without failing
-- upstream `meshix-observability` and `osyrra` release workflows can trigger the version-bump workflow directly
+- the upstream `osyrra` release workflow can trigger the version-bump workflow directly
 - the Tabex release workflow instead dispatches `publish-tabex-release.yml`; that trusted workflow verifies and publishes the exact public mirror before it triggers the local version bump
 
 ## GitHub UI Links
@@ -30,7 +30,7 @@ Result:
 
 ## SHPIT_GH_TOKEN
 
-Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. The Tabex publisher uses it only for the private source read; publication and the same-repository bump dispatch use the workflow's repository-scoped token. An org-level secret with `selected` visibility is the cleanest option if you have multiple consuming repos.
+Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/tabex` and `shpitdev/osyrra`. The Tabex publisher uses it only for the private source read; publication and the same-repository bump dispatch use the workflow's repository-scoped token. An org-level secret with `selected` visibility is the cleanest option if you have multiple consuming repos.
 
 Attach it to this repo with:
 
@@ -52,16 +52,12 @@ Create a fine-grained PAT that can trigger workflow dispatches in:
 
 Store that PAT as the GitHub org secret `SHPIT_WORKFLOW_DISPATCH_TOKEN` with `selected` visibility for these producer repos:
 
-- `shpitdev/meshix-observability`
 - `shpitdev/tabex`
 - `shpitdev/osyrra`
 
 Those producer release workflows run in Depot CI, so GitHub org secrets are not enough on their own. Mirror the same secret into Depot for each producer repo with one of these paths:
 
 ```bash
-cd /home/anandpant/Development/shpitdev/meshix/meshix-observability
-depot ci migrate secrets-and-vars -y
-
 cd /home/anandpant/Development/shpitdev/tabex
 depot ci migrate secrets-and-vars -y
 
@@ -72,7 +68,6 @@ depot ci migrate secrets-and-vars -y
 Or add the Depot secrets directly:
 
 ```bash
-depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/meshix-observability
 depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/tabex
 depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/osyrra
 ```
@@ -100,7 +95,7 @@ That is safe because `v0.0.4` is the first stable release that ships the source-
 
 When you are ready to publish to AUR:
 
-1. Create the target AUR package repos (`meshix-cli-bin`, `tabex-bin`, `osyrra-bin`).
+1. Create the target AUR package repos (`tabex-bin`, `osyrra-bin`).
 2. Generate an SSH key that can push to those AUR repos.
 3. Add these repo secrets:
    - `AUR_USERNAME`
@@ -112,12 +107,12 @@ When you are ready to publish to AUR:
 ## Token Model
 
 - Same-repo automation uses the built-in `GITHUB_TOKEN`.
-- Cross-repo private release access for `meshix-cli-bin`, `tabex-bin`, and `osyrra-bin` needs a separate credential in Actions, because the workflow token is scoped to the repository that contains the workflow.
+- Cross-repo private release access for `tabex-bin` and `osyrra-bin` needs a separate credential in Actions, because the workflow token is scoped to the repository that contains the workflow.
 - Local runs can use your normal `gh auth login` session instead of any exported token.
 
 ## Recommended Follow-Up
 
 Replace the org-level token with a narrower machine credential when practical:
 
-1. Create a dedicated machine user token with only the repo access needed for private release reads on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`.
+1. Create a dedicated machine user token with only the repo access needed for private release reads on `shpitdev/tabex` and `shpitdev/osyrra`.
 2. Or use a GitHub App installation token flow for the cleanest long-term setup.
