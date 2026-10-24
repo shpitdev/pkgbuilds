@@ -9,7 +9,6 @@ on:
         options:
           - changed
           - foundry-cli-bin
-          - meshix-cli-bin
           - tabex-bin
           - osyrra-bin
         default: changed
@@ -43,7 +42,7 @@ jobs:
 
           if [[ -n "$TARGET_PACKAGE" && "$TARGET_PACKAGE" != changed ]]; then
             case "$TARGET_PACKAGE" in
-              foundry-cli-bin|meshix-cli-bin|tabex-bin|osyrra-bin) ;;
+              foundry-cli-bin|tabex-bin|osyrra-bin) ;;
               *) echo 'Unknown package' >&2; exit 1 ;;
             esac
             [[ -f "$TARGET_PACKAGE/PKGBUILD" ]]
@@ -60,6 +59,18 @@ jobs:
               | xargs -r -n1 dirname \
               | sort -u
           )
+
+          # A removed package directory has no PKGBUILD left. Skip it so the
+          # AUR repo is left untouched; AUR deletion is a separate manual request.
+          existing=()
+          for package in "${packages[@]}"; do
+            if [[ -f "${package}/PKGBUILD" ]]; then
+              existing+=("${package}")
+            else
+              echo "Skipping removed package: ${package}"
+            fi
+          done
+          packages=("${existing[@]}")
 
           if ((${#packages[@]} == 0)); then
             echo 'packages=[]' >> "${GITHUB_OUTPUT}"
