@@ -1,6 +1,6 @@
 pkgbase = tabex-bin
 	pkgdesc = Tabex CLI for browser session, capture, and page inspection
-	pkgver = 0.0.42
+	pkgver = 0.0.46
 	pkgrel = 1
 	url = https://tabex.dev
 	install = tabex-bin.install
@@ -8,7 +8,7 @@ pkgbase = tabex-bin
 	license = LicenseRef-proprietary
 	provides = tabex
 	conflicts = tabex
-	source = https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v0.0.42/tabex_v0.0.42_linux_amd64.tar.gz
-	sha256sums = bf230fe7c809e388f5ac8066e29fcf5efb41b869dec4b45ec0ab29c70e37fbbe
+	source = https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v0.0.46/tabex_v0.0.46_linux_amd64.tar.gz
+	sha256sums = 21628c9a48121a793f75cf10ccf6f54257c8be1b885d39dc5a999029b3f4e151
 
 pkgname = tabex-bin
