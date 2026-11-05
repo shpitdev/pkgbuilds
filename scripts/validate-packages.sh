@@ -12,6 +12,7 @@ done
 
 "${repo_root}/scripts/validate-foundry-cli-archive.test.sh"
 "${repo_root}/scripts/select-foundry-cli-asset.test.sh"
+"${repo_root}/scripts/update-foundry-cli-bin.test.sh"
 
 tabex_pkg="${repo_root}/tabex-bin"
 if [[ -f "${tabex_pkg}/PKGBUILD" ]]; then

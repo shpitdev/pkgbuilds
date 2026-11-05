@@ -43,7 +43,8 @@ grep -Fxq "foundry-cli" <<<"${listing}"
 grep -Fxq "LICENSE" <<<"${listing}"
 grep -Fxq "README.md" <<<"${listing}"
 
-if ! grep -Eq '^templates/(compute-module-ts|compute-modules/typescript)/package\.json$' <<<"${listing}"; then
+if grep -Eq '^templates(/|$)' <<<"${listing}" &&
+  ! grep -Eq '^templates/(compute-module-ts|compute-modules/typescript)/package\.json$' <<<"${listing}"; then
   echo "Release archive ${archive} is missing a recognized compute module template package.json." >&2
   exit 1
 fi

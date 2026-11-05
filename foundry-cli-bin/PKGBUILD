@@ -29,13 +29,15 @@ package() {
   install -dm755 "${pkgdir}/usr/lib/foundry-cli"
   install -Dm755 "foundry-cli" \
     "${pkgdir}/usr/lib/foundry-cli/foundry-cli"
-  cp -R templates "${pkgdir}/usr/lib/foundry-cli/"
+  if [[ -d templates ]]; then
+    cp -R templates "${pkgdir}/usr/lib/foundry-cli/"
 
-  if [[ ! -f "${pkgdir}/usr/lib/foundry-cli/templates/README.md" ]]; then
-    install -Dm644 /dev/stdin \
-      "${pkgdir}/usr/lib/foundry-cli/templates/README.md" <<'EOT'
+    if [[ ! -f "${pkgdir}/usr/lib/foundry-cli/templates/README.md" ]]; then
+      install -Dm644 /dev/stdin \
+        "${pkgdir}/usr/lib/foundry-cli/templates/README.md" <<'EOT'
 # templates
 EOT
+    fi
   fi
 
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
