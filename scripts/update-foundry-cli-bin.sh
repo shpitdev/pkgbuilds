@@ -134,7 +134,9 @@ fi
   "${repo_root}/scripts/validate-foundry-cli-archive.sh" "${asset_name}"
 )
 
-perl -0pi -e "s/^pkgver=.*/pkgver=${pkgver}/m" "${pkgbuild}"
+if ! grep -Fxq "pkgver=${pkgver}" "${pkgbuild}"; then
+  perl -0pi -e "s/^pkgver=.*/pkgver=${pkgver}/m; s/^pkgrel=.*/pkgrel=1/m" "${pkgbuild}"
+fi
 perl -0pi -e "s/^_sha256=.*/_sha256='${sha256}'/m" "${pkgbuild}"
 
 "${repo_root}/scripts/render-srcinfo.sh" "${package_dir}"
