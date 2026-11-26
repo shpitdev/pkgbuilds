@@ -37,7 +37,12 @@ make_workspace() {
   chmod +x "${work}/archive/foundry-cli"
   printf 'Fixture license\n' > "${work}/archive/LICENSE"
   printf '# Foundry CLI fixture\n' > "${work}/archive/README.md"
-  local members=(foundry-cli LICENSE README.md)
+  mkdir -p "${work}/archive/bin" "${work}/archive/libexec/cli-ts/1.0.0" "${work}/archive/libexec/superrepo/1.0.0"
+  printf '#!/bin/sh\necho fixture-ts\n' > "${work}/archive/bin/foundry-cli-ts"
+  chmod +x "${work}/archive/bin/foundry-cli-ts"
+  printf 'TS payload\n' > "${work}/archive/libexec/cli-ts/1.0.0/launch.cjs"
+  printf 'SuperRepo payload\n' > "${work}/archive/libexec/superrepo/1.0.0/main.mjs"
+  local members=(foundry-cli LICENSE README.md bin libexec)
   if [[ "${layout}" != core-only ]]; then
     mkdir -p "${work}/archive/templates/${layout}"
     printf '{"name":"fixture-template"}\n' > "${work}/archive/templates/${layout}/package.json"
@@ -84,7 +89,7 @@ for layout in core-only compute-module-ts compute-modules/typescript; do
   (
     source "${work}/repo/foundry-cli-bin/PKGBUILD"
     digest="$(sha256sum "${ARCHIVE_FIXTURE}")"
-    [[ "${pkgver}" == 1.2.3 && "${_sha256}" == "${digest%% *}" ]]
+    [[ "${pkgver}" == 1.2.3 && "${pkgrel}" == 1 && "${_sha256}" == "${digest%% *}" ]]
   )
   "${repo_root}/scripts/validate-package.sh" "${work}/repo/foundry-cli-bin"
   if ! run_makepkg "${work}" > "${work}/makepkg.log" 2>&1; then
@@ -96,9 +101,15 @@ for layout in core-only compute-module-ts compute-modules/typescript; do
   mkdir "${work}/installed"
   tar -xf "${packages[0]}" -C "${work}/installed"
   installed="${work}/installed/usr"
-  [[ -L "${installed}/bin/foundry-cli" && -x "${installed}/bin/foundry-cli" ]]
-  [[ "$("${installed}/bin/foundry-cli")" == fixture-cli ]]
-  cmp "${work}/archive/foundry-cli" "${installed}/lib/foundry-cli/foundry-cli"
+  for launcher in foundry-cli foundry-cli-go fcli; do
+    [[ "$(readlink "${installed}/bin/${launcher}")" == ../lib/foundry-cli/bin/foundry-cli-go ]]
+    [[ "$("${installed}/bin/${launcher}")" == fixture-cli ]]
+  done
+  [[ "$(readlink "${installed}/bin/foundry-cli-ts")" == ../lib/foundry-cli/bin/foundry-cli-ts ]]
+  [[ "$("${installed}/bin/foundry-cli-ts")" == fixture-ts ]]
+  cmp "${work}/archive/foundry-cli" "${installed}/lib/foundry-cli/bin/foundry-cli-go"
+  cmp "${work}/archive/bin/foundry-cli-ts" "${installed}/lib/foundry-cli/bin/foundry-cli-ts"
+  diff -r "${work}/archive/libexec" "${installed}/lib/foundry-cli/libexec"
   cmp "${work}/archive/LICENSE" "${installed}/share/licenses/foundry-cli-bin/LICENSE"
   cmp "${work}/archive/README.md" "${installed}/share/doc/foundry-cli-bin/README.md"
   if [[ "${layout}" == core-only ]]; then

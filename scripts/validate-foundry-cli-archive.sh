@@ -39,9 +39,13 @@ while IFS= read -r mode _; do
   esac
 done < <(tar -tvzf "${archive}")
 
-grep -Fxq "foundry-cli" <<<"${listing}"
-grep -Fxq "LICENSE" <<<"${listing}"
-grep -Fxq "README.md" <<<"${listing}"
+for required in '^foundry-cli$' '^LICENSE$' '^README\.md$' '^bin/foundry-cli-ts$' \
+  '^libexec/cli-ts/[^/]+/launch\.cjs$' '^libexec/superrepo/[^/]+/main\.mjs$'; do
+  if ! grep -Eq "${required}" <<<"${listing}"; then
+    echo "Release archive ${archive} is missing a required member (${required})." >&2
+    exit 1
+  fi
+done
 
 if grep -Eq '^templates(/|$)' <<<"${listing}" &&
   ! grep -Eq '^templates/(compute-module-ts|compute-modules/typescript)/package\.json$' <<<"${listing}"; then

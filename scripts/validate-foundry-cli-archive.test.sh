@@ -9,9 +9,12 @@ trap 'rm -rf "${test_root}"' EXIT
 
 make_base_fixture() {
   local root="$1" layout="$2"
-  mkdir -p "${root}"
+  mkdir -p "${root}/bin" "${root}/libexec/cli-ts/1.0.0" "${root}/libexec/superrepo/1.0.0"
   printf '#!/usr/bin/env bash\nprintf "fixture-cli\\n"\n' > "${root}/foundry-cli"
-  chmod +x "${root}/foundry-cli"
+  printf '#!/usr/bin/env bash\nprintf "fixture-ts\\n"\n' > "${root}/bin/foundry-cli-ts"
+  chmod +x "${root}/foundry-cli" "${root}/bin/foundry-cli-ts"
+  printf 'TS payload\n' > "${root}/libexec/cli-ts/1.0.0/launch.cjs"
+  printf 'SuperRepo payload\n' > "${root}/libexec/superrepo/1.0.0/main.mjs"
   printf 'Fixture license\n' > "${root}/LICENSE"
   printf '# Foundry CLI fixture\n' > "${root}/README.md"
   if [[ "${layout}" != core-only ]]; then
@@ -31,12 +34,12 @@ expect_rejected() {
 for layout in core-only compute-module-ts compute-modules/typescript; do
   fixture="${test_root}/${layout}"
   make_base_fixture "${fixture}" "${layout}"
-  members=(foundry-cli LICENSE README.md)
+  members=(foundry-cli LICENSE README.md bin libexec)
   [[ "${layout}" == core-only ]] || members+=(templates)
   tar -C "${fixture}" -czf "${test_root}/good.tar.gz" "${members[@]}"
   "${validator}" "${test_root}/good.tar.gz"
 
-  for required in foundry-cli LICENSE README.md; do
+  for required in foundry-cli LICENSE README.md bin/foundry-cli-ts libexec/cli-ts/1.0.0/launch.cjs libexec/superrepo/1.0.0/main.mjs; do
     tar -C "${fixture}" -czf "${test_root}/missing.tar.gz" \
       --exclude="${required}" "${members[@]}"
     expect_rejected "${test_root}/missing.tar.gz"
@@ -67,5 +70,5 @@ done
 mkdir -p "${test_root}/core-only/templates"
 printf '# Incomplete template bundle\n' > "${test_root}/core-only/templates/README.md"
 tar -C "${test_root}/core-only" -czf "${test_root}/incomplete.tar.gz" \
-  foundry-cli LICENSE README.md templates
+  foundry-cli LICENSE README.md bin libexec templates
 expect_rejected "${test_root}/incomplete.tar.gz"
